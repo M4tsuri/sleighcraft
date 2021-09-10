@@ -15,5 +15,6 @@
 pub mod error;
 pub mod sleigh;
 pub mod prelude;
+pub mod pcode;
 
 pub use sleigh::*;

@@ -20,7 +20,7 @@ use std::collections::HashMap;
 
 #[cxx::bridge]
 pub mod ffi {
-
+    
     enum SpaceType {
         Constant = 0,
         Processor = 1,
@@ -29,161 +29,6 @@ pub mod ffi {
         Fspec = 4,
         Iop = 5,
         Join = 6,
-    }
-
-    #[derive(Debug)]
-    pub enum PcodeOpCode {
-        COPY = 1,
-        ///< Copy one operand to another
-        LOAD = 2,
-        ///< Load from a pointer into a specified address space
-        STORE = 3,
-        ///< Store at a pointer into a specified address space
-        BRANCH = 4,
-        ///< Always branch
-        CBRANCH = 5,
-        ///< Conditional branch
-        BRANCHIND = 6,
-        ///< Indirect branch (jumptable)
-        CALL = 7,
-        ///< Call to an absolute address
-        CALLIND = 8,
-        ///< Call through an indirect address
-        CALLOTHER = 9,
-        ///< User-defined operation
-        RETURN = 10,
-        ///< Return from subroutine
-        // Integer/bit operations
-        INT_EQUAL = 11,
-        ///< Integer comparison, equality (==)
-        INT_NOTEQUAL = 12,
-        ///< Integer comparison, in-equality (!=)
-        INT_SLESS = 13,
-        ///< Integer comparison, signed less-than (<)
-        INT_SLESSEQUAL = 14,
-        ///< Integer comparison, signed less-than-or-equal (<=)
-        INT_LESS = 15,
-        ///< Integer comparison, unsigned less-than (<)
-        // This also indicates a borrow on unsigned substraction
-        INT_LESSEQUAL = 16,
-        ///< Integer comparison, unsigned less-than-or-equal (<=)
-        INT_ZEXT = 17,
-        ///< Zero extension
-        INT_SEXT = 18,
-        ///< Sign extension
-        INT_ADD = 19,
-        ///< Addition, signed or unsigned (+)
-        INT_SUB = 20,
-        ///< Subtraction, signed or unsigned (-)
-        INT_CARRY = 21,
-        ///< Test for unsigned carry
-        INT_SCARRY = 22,
-        ///< Test for signed carry
-        INT_SBORROW = 23,
-        ///< Test for signed borrow
-        INT_2COMP = 24,
-        ///< Twos complement
-        INT_NEGATE = 25,
-        ///< Logical/bitwise negation (~)
-        INT_XOR = 26,
-        ///< Logical/bitwise exclusive-or (^)
-        INT_AND = 27,
-        ///< Logical/bitwise and (&)
-        INT_OR = 28,
-        ///< Logical/bitwise or (|)
-        INT_LEFT = 29,
-        ///< Left shift (<<)
-        INT_RIGHT = 30,
-        ///< Right shift, logical (>>)
-        INT_SRIGHT = 31,
-        ///< Right shift, arithmetic (>>)
-        INT_MULT = 32,
-        ///< Integer multiplication, signed and unsigned (*)
-        INT_DIV = 33,
-        ///< Integer division, unsigned (/)
-        INT_SDIV = 34,
-        ///< Integer division, signed (/)
-        INT_REM = 35,
-        ///< Remainder/modulo, unsigned (%)
-        INT_SREM = 36,
-        ///< Remainder/modulo, signed (%)
-        BOOL_NEGATE = 37,
-        ///< Boolean negate (!)
-        BOOL_XOR = 38,
-        ///< Boolean exclusive-or (^^)
-        BOOL_AND = 39,
-        ///< Boolean and (&&)
-        BOOL_OR = 40,
-        ///< Boolean or (||)
-        // Floating point operations
-        FLOAT_EQUAL = 41,
-        ///< Floating-point comparison, equality (==)
-        FLOAT_NOTEQUAL = 42,
-        ///< Floating-point comparison, in-equality (!=)
-        FLOAT_LESS = 43,
-        ///< Floating-point comparison, less-than (<)
-        FLOAT_LESSEQUAL = 44,
-        ///< Floating-point comparison, less-than-or-equal (<=)
-        // Slot 45 is currently unused
-        FLOAT_NAN = 46,
-        ///< Not-a-number test (NaN)
-        FLOAT_ADD = 47,
-        ///< Floating-point addition (+)
-        FLOAT_DIV = 48,
-        ///< Floating-point division (/)
-        FLOAT_MULT = 49,
-        ///< Floating-point multiplication (*)
-        FLOAT_SUB = 50,
-        ///< Floating-point subtraction (-)
-        FLOAT_NEG = 51,
-        ///< Floating-point negation (-)
-        FLOAT_ABS = 52,
-        ///< Floating-point absolute value (abs)
-        FLOAT_SQRT = 53,
-        ///< Floating-point square root (sqrt)
-        FLOAT_INT2FLOAT = 54,
-        ///< Convert an integer to a floating-point
-        FLOAT_FLOAT2FLOAT = 55,
-        ///< Convert between different floating-point sizes
-        FLOAT_TRUNC = 56,
-        ///< Round towards zero
-        FLOAT_CEIL = 57,
-        ///< Round towards +infinity
-        FLOAT_FLOOR = 58,
-        ///< Round towards -infinity
-        FLOAT_ROUND = 59,
-        ///< Round towards nearest
-        // Internal opcodes for simplification. Not
-        // typically generated in a direct translation.
-
-        // Data-flow operations
-        MULTIEQUAL = 60,
-        ///< Phi-node operator
-        INDIRECT = 61,
-        ///< Copy with an indirect effect
-        PIECE = 62,
-        ///< Concatenate
-        SUBPIECE = 63,
-        ///< Truncate
-        CAST = 64,
-        ///< Cast from one data-type to another
-        PTRADD = 65,
-        ///< Index into an array ([])
-        PTRSUB = 66,
-        ///< Drill down to a sub-field  (->)
-        SEGMENTOP = 67,
-        ///< Look-up a \e segmented address
-        CPOOLREF = 68,
-        ///< Recover a value from the \e constant \e pool
-        NEW = 69,
-        ///< Allocate a new object (new)
-        INSERT = 70,
-        ///< Insert a bit-range
-        EXTRACT = 71,
-        ///< Extract a bit-range
-        POPCOUNT = 72,
-        ///< Count the 1-bits
-        MAX = 73,
     }
 
     extern "Rust" {
@@ -216,6 +61,7 @@ pub mod ffi {
     }
 
     unsafe extern "C++" {
+        type PcodeOpCode = crate::pcode::ffi::PcodeOpCode;
         include!("sleighcraft/src/cpp/bridge/disasm.h");
         include!("sleighcraft/src/cpp/bridge/proxies.h");
         type OpBehaviorProxy;
@@ -404,86 +250,6 @@ use std::borrow::BorrowMut;
 use std::pin::Pin;
 use num_enum::TryFromPrimitive;
 use crate::Mode::MODE16;
-
-impl ToString for PcodeOpCode {
-    fn to_string(&self) -> String {
-        match *self {
-            PcodeOpCode::COPY => String::from("COPY"),
-            PcodeOpCode::LOAD => String::from("LOAD"),
-            PcodeOpCode::STORE => String::from("STORE"),
-            PcodeOpCode::BRANCH => String::from("BRANCH"),
-            PcodeOpCode::CBRANCH => String::from("CBRANCH"),
-            PcodeOpCode::BRANCHIND => String::from("BRANCHIND"),
-            PcodeOpCode::CALL => String::from("CALL"),
-            PcodeOpCode::CALLIND => String::from("CALLIND"),
-            PcodeOpCode::CALLOTHER => String::from("CALLOTHER"),
-            PcodeOpCode::RETURN => String::from("RETURN"),
-            PcodeOpCode::INT_EQUAL => String::from("INT_EQUAL"),
-            PcodeOpCode::INT_NOTEQUAL => String::from("INT_NOTEQUAL"),
-            PcodeOpCode::INT_SLESS => String::from("INT_SLESS"),
-            PcodeOpCode::INT_SLESSEQUAL => String::from("INT_SLESSEQUAL"),
-            PcodeOpCode::INT_LESS => String::from("INT_LESS"),
-            PcodeOpCode::INT_LESSEQUAL => String::from("INT_LESSEQUAL"),
-            PcodeOpCode::INT_ZEXT => String::from("INT_ZEXT"),
-            PcodeOpCode::INT_SEXT => String::from("INT_SEXT"),
-            PcodeOpCode::INT_ADD => String::from("INT_ADD"),
-            PcodeOpCode::INT_SUB => String::from("INT_SUB"),
-            PcodeOpCode::INT_CARRY => String::from("INT_CARRY"),
-            PcodeOpCode::INT_SCARRY => String::from("INT_SCARRY"),
-            PcodeOpCode::INT_SBORROW => String::from("INT_SBORROW"),
-            PcodeOpCode::INT_2COMP => String::from("INT_2COMP"),
-            PcodeOpCode::INT_NEGATE => String::from("INT_NEGATE"),
-            PcodeOpCode::INT_XOR => String::from("INT_XOR"),
-            PcodeOpCode::INT_AND => String::from("INT_AND"),
-            PcodeOpCode::INT_OR => String::from("INT_OR"),
-            PcodeOpCode::INT_LEFT => String::from("INT_LEFT"),
-            PcodeOpCode::INT_RIGHT => String::from("INT_RIGHT"),
-            PcodeOpCode::INT_SRIGHT => String::from("INT_SRIGHT"),
-            PcodeOpCode::INT_MULT => String::from("INT_MULT"),
-            PcodeOpCode::INT_DIV => String::from("INT_DIV"),
-            PcodeOpCode::INT_SDIV => String::from("INT_SDIV"),
-            PcodeOpCode::INT_REM => String::from("INT_REM"),
-            PcodeOpCode::INT_SREM => String::from("INT_SREM"),
-            PcodeOpCode::BOOL_NEGATE => String::from("BOOL_NEGATE"),
-            PcodeOpCode::BOOL_XOR => String::from("BOOL_XOR"),
-            PcodeOpCode::BOOL_AND => String::from("BOOL_AND"),
-            PcodeOpCode::BOOL_OR => String::from("BOOL_OR"),
-            PcodeOpCode::FLOAT_EQUAL => String::from("FLOAT_EQUAL"),
-            PcodeOpCode::FLOAT_NOTEQUAL => String::from("FLOAT_NOTEQUAL"),
-            PcodeOpCode::FLOAT_LESS => String::from("FLOAT_LESS"),
-            PcodeOpCode::FLOAT_LESSEQUAL => String::from("FLOAT_LESSEQUAL"),
-            PcodeOpCode::FLOAT_NAN => String::from("FLOAT_NAN"),
-            PcodeOpCode::FLOAT_ADD => String::from("FLOAT_ADD"),
-            PcodeOpCode::FLOAT_DIV => String::from("FLOAT_DIV"),
-            PcodeOpCode::FLOAT_MULT => String::from("FLOAT_MULT"),
-            PcodeOpCode::FLOAT_SUB => String::from("FLOAT_SUB"),
-            PcodeOpCode::FLOAT_NEG => String::from("FLOAT_NEG"),
-            PcodeOpCode::FLOAT_ABS => String::from("FLOAT_ABS"),
-            PcodeOpCode::FLOAT_SQRT => String::from("FLOAT_SQRT"),
-            PcodeOpCode::FLOAT_INT2FLOAT => String::from("FLOAT_INT2FLOAT"),
-            PcodeOpCode::FLOAT_FLOAT2FLOAT => String::from("FLOAT_FLOAT2FLOAT"),
-            PcodeOpCode::FLOAT_TRUNC => String::from("FLOAT_TRUNC"),
-            PcodeOpCode::FLOAT_CEIL => String::from("FLOAT_CEIL"),
-            PcodeOpCode::FLOAT_FLOOR => String::from("FLOAT_FLOOR"),
-            PcodeOpCode::FLOAT_ROUND => String::from("FLOAT_ROUND"),
-            PcodeOpCode::MULTIEQUAL => String::from("MULTIEQUAL"),
-            PcodeOpCode::INDIRECT => String::from("INDIRECT"),
-            PcodeOpCode::PIECE => String::from("PIECE"),
-            PcodeOpCode::SUBPIECE => String::from("SUBPIECE"),
-            PcodeOpCode::CAST => String::from("CAST"),
-            PcodeOpCode::PTRADD => String::from("PTRADD"),
-            PcodeOpCode::PTRSUB => String::from("PTRSUB"),
-            PcodeOpCode::SEGMENTOP => String::from("SEGMENTOP"),
-            PcodeOpCode::CPOOLREF => String::from("CPOOLREF"),
-            PcodeOpCode::NEW => String::from("NEW"),
-            PcodeOpCode::INSERT => String::from("INSERT"),
-            PcodeOpCode::EXTRACT => String::from("EXTRACT"),
-            PcodeOpCode::POPCOUNT => String::from("POPCOUNT"),
-            PcodeOpCode::MAX => String::from("MAX"),
-            _ => unreachable!(),
-        }
-    }
-}
 
 #[derive(TryFromPrimitive,Copy, Clone)]
 #[repr(i32)]
