@@ -15,11 +15,6 @@ cxx = "1.0"
 once_cell = "1.6.0"
 num_enum = "0.5.1"
 
-[dependencies.pyo3]
-version = "0.13.2"
-features = ["extension-module"]
-
-
 [build-dependencies]
 cxx-build = "1.0"
 filetime = "0.2" # for incremental compilation

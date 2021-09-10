@@ -12,8 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use pyo3::exceptions::PyOSError;
-use pyo3::PyErr;
 use std::{error, fmt};
 
 #[derive(Debug)]
@@ -23,7 +21,6 @@ pub enum Error {
     CppException(cxx::Exception),
     ArchNotFound(String),
     MissingArg(String),
-    PyException(String),
 }
 impl From<std::io::Error> for Error {
     fn from(err: std::io::Error) -> Self {
@@ -34,12 +31,6 @@ impl From<std::io::Error> for Error {
 impl From<cxx::Exception> for Error {
     fn from(err: cxx::Exception) -> Self {
         Self::CppException(err)
-    }
-}
-
-impl From<PyErr> for Error {
-    fn from(err: PyErr) -> Self {
-        Self::PyException(err.to_string())
     }
 }
 
@@ -61,16 +52,7 @@ impl fmt::Display for Error {
             Self::MissingArg(s) => {
                 write!(f, "missing argument: {}", s)
             }
-            Self::PyException(s) => {
-                write!(f, "python exception: {}", s)
-            }
         }
-    }
-}
-
-impl std::convert::From<Error> for PyErr {
-    fn from(_err: Error) -> PyErr {
-        PyOSError::new_err(_err.to_string())
     }
 }
 
