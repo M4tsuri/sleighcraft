@@ -19,7 +19,8 @@
 #include "typeop.hh"
 #include "opbehavior_proxy.hh"
 #include "cover_proxy.hh"
-#include "sleighcraft/src/sleigh.rs.h"
+#include "sleighcraft/src/ffi/mod.rs.h"
+
 
 class TypeOpProxy {
 public:

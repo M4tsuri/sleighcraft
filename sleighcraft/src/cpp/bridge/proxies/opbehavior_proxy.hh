@@ -17,7 +17,8 @@
 #define BRIDGE_PROXIES_OPBEHAVIOR_PROXY
 
 #include "opbehavior.hh"
-#include "sleighcraft/src/sleigh.rs.h"
+#include "sleighcraft/src/ffi/mod.rs.h"
+
 
 class OpBehaviorProxy {
 public:

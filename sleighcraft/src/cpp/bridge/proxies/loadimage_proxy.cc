@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 //#include "loadimage_proxy.hh"
-//#include "sleighcraft/src/sleigh.rs.h"
+//#include "sleighcraft/src/ffi/mod.rs.h"
+//
 //
 //RustLoadImageProxy::RustLoadImageProxy(RustLoadImage &load_image): load_image(&load_image), LoadImage("nofile") {}
 //RustLoadImageProxy::RustLoadImageProxy(RustLoadImage *load_image): load_image(*load_image), LoadImage("nofile")  {}

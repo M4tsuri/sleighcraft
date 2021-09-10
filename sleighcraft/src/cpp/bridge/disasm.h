@@ -21,7 +21,8 @@
 #include "loadimage.hh"
 #include <memory>
 #include "rust/cxx.h"
-#include "sleighcraft/src/sleigh.rs.h"
+#include "sleighcraft/src/ffi/mod.rs.h"
+
 
 class RustLoadImage;
 class RustAssemblyEmit;

@@ -18,7 +18,8 @@
 
 /*
 #include "opcodes.hh"
-#include "sleighcraft/src/sleigh.rs.h"
+#include "sleighcraft/src/ffi/mod.rs.h"
+
 
 class OpCodesProxy {
 public:
