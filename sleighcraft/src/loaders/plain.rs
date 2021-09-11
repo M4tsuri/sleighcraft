@@ -1,5 +1,3 @@
-use std::str::pattern::Searcher;
-
 use crate::ffi::ffi::AddressProxy;
 use super::Loader;
 
