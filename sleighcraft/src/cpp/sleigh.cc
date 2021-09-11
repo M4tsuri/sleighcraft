@@ -590,12 +590,12 @@ void Sleigh::resolve(ParserContext &pos) const
       walker.setOffset(off);
       TripleSymbol *tsym = sym->getDefiningSymbol();
       if (tsym != (TripleSymbol *)0) {
-	subct = tsym->resolve(walker);
-	if (subct != (Constructor *)0) {
-	  walker.setConstructor(subct);
-	  subct->applyContext(walker);
-	  break;
-	}
+	      subct = tsym->resolve(walker);
+	      if (subct != (Constructor *)0) {
+	        walker.setConstructor(subct);
+	        subct->applyContext(walker);
+	        break;
+	      }
       }
       walker.setCurrentLength(sym->getMinimumLength());
       walker.popOperand();
@@ -607,7 +607,7 @@ void Sleigh::resolve(ParserContext &pos) const
 				// Check for use of delayslot
       ConstructTpl *templ = ct->getTempl();
       if ((templ != (ConstructTpl *)0)&&(templ->delaySlot() > 0))
-	pos.setDelaySlot(templ->delaySlot());
+	      pos.setDelaySlot(templ->delaySlot());
     }
   }
   pos.setNaddr(pos.getAddr()+pos.getLength());	// Update Naddr to pointer after instruction
