@@ -15,8 +15,6 @@
 
 pub mod error;
 pub mod sleigh;
-pub mod prelude;
 pub mod pcode;
+pub mod loaders;
 mod ffi;
-
-pub use sleigh::*;

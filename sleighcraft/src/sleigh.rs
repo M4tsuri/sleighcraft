@@ -17,6 +17,7 @@
 
 
 use crate::error::{Error, Result};
+use crate::loaders::{Loader, RustLoaderWrapper};
 use cxx::{CxxString, UniquePtr};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
@@ -24,7 +25,6 @@ use std::collections::HashMap;
 use crate::ffi::ffi::*;
 use std::borrow::BorrowMut;
 use std::pin::Pin;
-use crate::Mode::MODE16;
 
 #[derive(Copy, Clone)]
 #[repr(i32)]
@@ -188,68 +188,6 @@ impl<'a> RustPcodeEmit<'a> {
     }
 }
 
-pub trait LoadImage {
-    fn load_fill(&mut self, ptr: &mut [u8], addr: &AddressProxy);
-    fn adjust_vma(&mut self, _adjust: isize) {}
-    fn buf_size(&mut self) -> usize;
-}
-
-pub struct RustLoadImage<'a> {
-    internal: &'a mut dyn LoadImage,
-}
-
-impl<'a> RustLoadImage<'a> {
-    pub fn from_internal(internal: &'a mut dyn LoadImage) -> Self {
-        Self { internal }
-    }
-
-    pub fn load_fill(&mut self, ptr: &mut [u8], addr: &AddressProxy) {
-        self.internal.load_fill(ptr, addr)
-    }
-
-    pub fn adjust_vma(&mut self, adjust: isize) {
-        self.internal.adjust_vma(adjust)
-    }
-    pub fn buf_size(&mut self) -> usize {
-        self.internal.buf_size()
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct PlainLoadImage {
-    buf: Vec<u8>,
-    start: u64,
-}
-
-impl LoadImage for PlainLoadImage {
-    fn load_fill(&mut self, ptr: &mut [u8], addr: &AddressProxy) {
-        let start_off = addr.get_offset() as u64;
-        let size = ptr.len();
-        let max = self.start + (self.buf.len() as u64 - 1);
-
-        for i in 0..size {
-            let cur_off = start_off + i as u64;
-            if self.start <= cur_off && max >= cur_off {
-                let offset = (cur_off - self.start) as usize;
-                ptr[i] = self.buf[offset];
-            } else {
-                ptr[i] = 0;
-            }
-        }
-    }
-    fn buf_size(&mut self) -> usize {
-        self.buf.len()
-    }
-}
-
-impl PlainLoadImage {
-    pub fn from_buf(buf: &[u8], start: u64) -> Self {
-        let mut v = vec![];
-        v.extend_from_slice(buf);
-        Self { buf: v, start }
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Address {
     pub space: String,
@@ -407,7 +345,7 @@ pub struct Sleigh<'a> {
     sleigh_proxy: UniquePtr<SleighProxy>,
     asm_emit: RustAssemblyEmit<'a>,
     pcode_emit: RustPcodeEmit<'a>,
-    _load_image: Pin<Box<RustLoadImage<'a>>>,
+    _load_image: Pin<Box<RustLoaderWrapper<'a>>>,
 }
 
 impl<'a> Sleigh<'a> {
@@ -427,10 +365,11 @@ impl<'a> Sleigh<'a> {
 pub struct SleighBuilder<'a> {
     asm_emit: Option<RustAssemblyEmit<'a>>,
     pcode_emit: Option<RustPcodeEmit<'a>>,
-    load_image: Option<RustLoadImage<'a>>,
+    loader: Option<RustLoaderWrapper<'a>>,
     spec: Option<String>,
     mode: Option<Mode>,
 }
+
 impl<'a> SleighBuilder<'a> {
     // TODO: add from_arch(arch_name: &str) -> Self helper function.
 
@@ -455,22 +394,23 @@ impl<'a> SleighBuilder<'a> {
         self
     }
 
-    pub fn loader(&mut self, loader: &'a mut dyn LoadImage) -> &mut Self {
-        self.load_image = Some(RustLoadImage::from_internal(loader));
+    pub fn set_loader(&mut self, loader: &'a mut dyn Loader) -> &mut Self {
+        self.loader = Some(RustLoaderWrapper::new(loader));
         self
     }
 
     pub fn try_build(mut self) -> Result<Sleigh<'a>> {
         let load_image = self
-            .load_image
+            .loader
             .ok_or(Error::MissingArg("load_image".to_string()))?;
+
         let mut load_image = Box::pin(load_image);
         let mut sleigh_proxy = new_sleigh_proxy(&mut load_image);
 
         let spec = self.spec.ok_or(Error::MissingArg("spec".to_string()))?;
         if self.mode.is_none() {
             // Set default address and Operand size
-            self.mode = Some(MODE16);
+            self.mode = Some(Mode::MODE16);
         };
         sleigh_proxy
             .as_mut()

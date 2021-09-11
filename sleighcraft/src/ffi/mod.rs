@@ -1,7 +1,9 @@
 
 pub mod pcode;
-use crate::sleigh::{RustAssemblyEmit, RustLoadImage, RustPcodeEmit, Instruction};
+use crate::sleigh::{RustAssemblyEmit, RustPcodeEmit, Instruction};
+use crate::loaders::{RustLoaderWrapper};
 
+type RustLoadImage<'a> = RustLoaderWrapper<'a>;
 #[allow(dead_code)]
 #[cxx::bridge]
 pub(crate) mod ffi {
