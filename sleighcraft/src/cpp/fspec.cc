@@ -3174,17 +3174,20 @@ void FuncProto::setOutputLock(bool val)
   store->getOutput()->setTypeLock(val);
 }
 
-/// This value can be used as a hint as to how much of the return value is important and
-/// is used to inform the dead code \e consume algorithm.
-/// \param val is the estimated number of bytes or 0
-/// \return \b true if the value was changed
+/// Provide a hint as to how many bytes of the return value are important.
+/// The smallest hint is used to inform the dead-code removal algorithm.
+/// \param val is the hint (number of bytes or 0 for all bytes)
+/// \return \b true if the smallest hint has changed
 bool FuncProto::setReturnBytesConsumed(int4 val)
 
 {
-  int4 oldVal = returnBytesConsumed;
-  if (oldVal == 0 || val < oldVal)
+  if (val == 0)
+    return false;
+  if (returnBytesConsumed == 0 || val < returnBytesConsumed) {
     returnBytesConsumed = val;
-  return (oldVal != val);
+    return true;
+  }
+  return false;
 }
 
 /// \brief Assuming \b this prototype is locked, calculate the \e extrapop
@@ -4578,6 +4581,8 @@ void FuncCallSpecs::deindirect(Funcdata &data,Funcdata *newfd)
   if (isOverride())	// If we are overridden at the call-site
     return;		// Don't use the discovered function prototype
 
+  data.getOverride().insertIndirectOverride(op->getAddr(),entryaddress);
+
   // Try our best to merge existing prototype
   // with the one we have just been handed
   vector<Varnode *> newinput;
@@ -4589,7 +4594,6 @@ void FuncCallSpecs::deindirect(Funcdata &data,Funcdata *newfd)
     commitNewOutputs(data,newoutput);
   }
   else {
-    data.getOverride().insertIndirectOverride(op->getAddr(),entryaddress);
     data.setRestartPending(true);
   }
 }
@@ -4610,16 +4614,19 @@ void FuncCallSpecs::forceSet(Funcdata &data,const FuncProto &fp)
 {
   vector<Varnode *> newinput;
   Varnode *newoutput;
+
+  // Copy the recovered prototype into the override manager so that
+  // future restarts don't have to rediscover it
+  FuncProto *newproto = new FuncProto();
+  newproto->copy(fp);
+  data.getOverride().insertProtoOverride(op->getAddr(),newproto);
   if (lateRestriction(fp,newinput,newoutput)) {
     commitNewInputs(data,newinput);
     commitNewOutputs(data,newoutput);
   }
   else {
     // Too late to make restrictions to correct prototype
-    // Add a restart override with the forcing prototype
-    FuncProto *newproto = new FuncProto();
-    newproto->copy(fp);
-    data.getOverride().insertProtoOverride(op->getAddr(),newproto);
+    // Force a restart
     data.setRestartPending(true);
   }
   // Regardless of what happened, lock the prototype so it doesn't happen again
@@ -4744,7 +4751,7 @@ void FuncCallSpecs::checkInputTrialUse(Funcdata &data,AliasChecker &aliascheck)
 	  trial.markNoUse();
       }
       else if (ancestorReal.execute(op,slot,&trial,false)) {
-	if (data.ancestorOpUse(maxancestor,vn,op,trial))
+	if (data.ancestorOpUse(maxancestor,vn,op,trial,0))
 	  trial.markActive();
 	else
 	  trial.markInactive();
@@ -4754,7 +4761,7 @@ void FuncCallSpecs::checkInputTrialUse(Funcdata &data,AliasChecker &aliascheck)
     }
     else {
       if (ancestorReal.execute(op,slot,&trial,true)) {
-	if (data.ancestorOpUse(maxancestor,vn,op,trial)) {
+	if (data.ancestorOpUse(maxancestor,vn,op,trial,0)) {
 	  trial.markActive();
 	  if (trial.hasCondExeEffect())
 	    activeinput.markNeedsFinalCheck();

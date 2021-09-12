@@ -2522,7 +2522,7 @@ TypeDeclarator::~TypeDeclarator(void)
 
 Datatype *TypeDeclarator::buildType(Architecture *glb) const
 
-{ // Apply modifications to the basetype, (in reverse order of bindings)
+{ // Apply modifications to the basetype, (in reverse order of binding)
   Datatype *restype = basetype;
   vector<TypeModifier *>::const_iterator iter;
   iter = mods.end();

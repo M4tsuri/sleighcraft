@@ -98,6 +98,7 @@ const DECOMPILER_SOURCE_BASE_CXX: &[&str] = &[
     "slghpatexpress.cc",
     "slghpattern.cc",
     "pcodecompile.cc",
+    "xml.cc"
 ];
 
 /*
@@ -113,8 +114,6 @@ const SLEIGH_COMPILER_SOURCE_FLEX: [&'static str; 1] = [
     "slghscan.l"
 ];
 */
-
-const DECOMPILER_SOURCE_SLEIGH_YACC: &[&str] = &["pcodeparse.y", "grammar.y", "xml.y"];
 
 const PROXIES: &[&str] = &[
     "address_proxy.cc",
@@ -175,21 +174,6 @@ fn prepare() -> CompileOptions {
         }
     }
 
-    for src in DECOMPILER_SOURCE_SLEIGH_YACC.iter() {
-        let name = src.split('.').next().unwrap();
-        let path = Path::new("src")
-            .join("cpp")
-            .join("gen")
-            .join("bison")
-            .join(&format!("{}.cpp", name));
-
-        if need_recompile(&path) {
-            sources.push(path);
-        } else {
-            objects.push(obj_path_from_src_path(&path));
-        }
-    }
-
     for src in PROXIES.iter() {
         let path = Path::new("src")
             .join("cpp")
@@ -217,8 +201,6 @@ fn main() {
     }
     let disasm_src_path= Path::new("src").join("cpp").join("bridge").join("disasm.cpp");
     let src_cpp = Path::new("src").join("cpp");
-    let src_cpp_gen_bison = Path::new("src").join("cpp").join("gen").join("bison");
-    let src_cpp_gen_flex = Path::new("src").join("cpp").join("gen").join("flex");
     #[cfg(target_os = "windows")]
     {
         target.define("_WINDOWS", "1"); // This is assumed by ghidra, but not defined by msvc, strange.
@@ -231,7 +213,5 @@ fn main() {
         .files(compile_opts.sources)
         .flag_if_supported("-std=c++14")
         .include(src_cpp)
-        .include(src_cpp_gen_bison)
-        .include(src_cpp_gen_flex)
         .compile("sleigh");
 }

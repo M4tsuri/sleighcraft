@@ -129,12 +129,12 @@ inline const string &LoadImage::getFileName(void) const {
 /// This routine should read in and parse any symbol information
 /// that the load image contains about executable.  Once this
 /// method is called, individual symbol records are read out
-/// using the get_next_symbol() method.
+/// using the getNextSymbol() method.
 inline void LoadImage::openSymbols(void) const {
 }
 
 /// Once all the symbol information has been read out from the
-/// load image via the openSymbols() and get_next_symbol() calls,
+/// load image via the openSymbols() and getNextSymbol() calls,
 /// the application should call this method to free up resources
 /// used in parsing the symbol information.
 inline void LoadImage::closeSymbols(void) const {
