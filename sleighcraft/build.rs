@@ -208,7 +208,7 @@ fn prepare() -> CompileOptions {
 
 fn main() {
     let compile_opts = prepare();
-    let sleigh_src_file = Path::new("src").join("internal").join("ffi").join("mod.rs");
+    let sleigh_src_file = Path::new("src").join("internal").join("ffi.rs");
 
     let mut target = cxx_build::bridge(sleigh_src_file);
 

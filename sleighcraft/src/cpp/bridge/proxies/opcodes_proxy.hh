@@ -18,7 +18,7 @@
 
 /*
 #include "opcodes.hh"
-#include "sleighcraft/src/internal/ffi/mod.rs.h"
+#include "sleighcraft/src/internal/ffi.rs.h"
 
 
 class OpCodesProxy {

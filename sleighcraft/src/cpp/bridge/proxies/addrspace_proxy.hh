@@ -17,7 +17,7 @@
 #define BRIDGE_PROXIES_ADDRSPACE_PROXY
 
 #include "space.hh"
-#include "sleighcraft/src/internal/ffi/mod.rs.h"
+#include "sleighcraft/src/internal/ffi.rs.h"
 
 
 class AddrSpaceProxy {
