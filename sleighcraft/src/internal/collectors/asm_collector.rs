@@ -1,9 +1,17 @@
+use std::any::Any;
+
 use cxx::CxxString;
 use crate::internal::ffi::ffi::AddressProxy;
 use crate::pcode::{Instruction, Address};
 
 pub trait AsmCollector {
+    /// this function is invoked at the C++ side
     fn dump(&mut self, addr: &AddressProxy, mnem: &str, body: &str);
+
+    /// reset current collector
+    fn reset(&mut self) {}
+
+    fn as_any(&self) -> &dyn Any;
 }
 
 pub struct AsmCollectorWrapper {
@@ -21,11 +29,19 @@ impl AsmCollectorWrapper {
     pub fn new(internal: Box<dyn AsmCollector>) -> Self {
         Self { internal }
     }
+
+    pub fn reset(&mut self) {
+        self.internal.reset();
+    }
+
+    pub fn cast<T: AsmCollector + 'static>(&self) -> &T {
+        self.internal.as_any().downcast_ref::<T>().unwrap()
+    }
 }
 
 #[derive(Debug)]
 pub struct DefaultAsmCollector {
-    pub asms: Vec<Instruction>,
+    asms: Vec<Instruction>,
 }
 
 impl DefaultAsmCollector {
@@ -33,6 +49,10 @@ impl DefaultAsmCollector {
         Self {
             asms: vec![]
         }
+    }
+
+    pub fn get_content(&self) -> &Vec<Instruction> {
+        &self.asms
     }
 }
 
@@ -46,5 +66,13 @@ impl AsmCollector for DefaultAsmCollector {
             body: body.to_string(),
         };
         self.asms.push(asm)
+    }
+
+    fn reset(&mut self) {
+        self.asms.clear();
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

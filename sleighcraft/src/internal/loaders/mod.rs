@@ -21,6 +21,7 @@
 pub mod plain;
 
 use crate::internal::ffi::ffi::AddressProxy;
+use std::any::Any;
 
 /// Any loader must implement Loader trait, which enables sleigh to get raw bytes
 pub trait Loader {
@@ -29,6 +30,8 @@ pub trait Loader {
     fn adjust_vma(&mut self, _adjust: isize) {}
     /// return size of the loaded image
     fn buf_size(&mut self) -> usize;
+
+    fn as_any(&mut self) -> &mut dyn Any;
 }
 
 /// Wrapper for any object which implements `Loader` trait, only for ffi usage.
@@ -48,6 +51,10 @@ impl LoaderWrapper {
 
     pub(crate) fn buf_size(&mut self) -> usize {
         self.internal.buf_size()
+    }
+
+    pub(crate) fn cast<T: Loader + 'static>(&mut self) -> &mut T {
+        self.internal.as_any().downcast_mut::<T>().unwrap()
     }
 }
 

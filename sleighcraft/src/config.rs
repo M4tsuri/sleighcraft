@@ -1,6 +1,5 @@
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
-use crate::internal::error::*;
 
 pub(crate) const PRESET: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| load_preset());
 

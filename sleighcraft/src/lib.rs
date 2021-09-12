@@ -18,4 +18,4 @@ pub mod pcode;
 pub mod sleigh;
 
 mod internal;
-mod config;
+pub mod config;

@@ -44,12 +44,23 @@ impl Loader for PlainLoader {
     fn buf_size(&mut self) -> usize {
         self.buf.len()
     }
+
+    fn as_any(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
 }
 
+#[allow(dead_code)]
 impl PlainLoader {
     /// extend internal buffer with specified data
     pub fn extend(&mut self, buf: &[u8]) {
         self.buf.extend_from_slice(buf);
+    }
+
+    pub fn load(&mut self, buf: &[u8]) {
+        self.buf.clear();
+        self.buf.extend_from_slice(buf);
+        self.start = 0;
     }
 
     /// Construct a new loader with empty buffer and 0 offset

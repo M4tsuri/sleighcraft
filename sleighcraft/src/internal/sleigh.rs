@@ -21,11 +21,9 @@ use crate::internal::collectors::pcode_collector::{PcodeCollector, PcodeCollecto
 use crate::internal::error::{Error, Result};
 use crate::internal::loaders::{Loader, LoaderWrapper};
 use cxx::UniquePtr;
-use owning_ref::{BoxRefMut, OwningRef, OwningRefMut};
 
 use crate::internal::ffi::ffi::*;
 use std::borrow::BorrowMut;
-use std::marker::PhantomData;
 use std::pin::Pin;
 use crate::config::Mode;
 
@@ -48,6 +46,30 @@ impl Sleigh {
             .as_mut().unwrap()
             .decode_with(assembly_emit, pcodes_emit, start)
             .map_err(|e| Error::CppException(e))
+    }
+
+    pub(crate) fn init(&mut self) {
+        self.sleigh_proxy
+            .as_mut()
+            .unwrap()
+            .set_spec(self.spec.as_str(), self.mode as i32);
+    }
+
+    pub fn get_loader(&mut self) -> &mut Pin<Box<LoaderWrapper>> {
+        self.loader.borrow_mut()
+    }
+
+    pub fn get_pcode_collector(&self) -> &PcodeCollectorWrapper {
+        &self.pcode_emit
+    }
+
+    pub fn get_asm_collector(&self) -> &AsmCollectorWrapper {
+        &self.asm_emit
+    }
+
+    pub fn reset_collectors(&mut self) {
+        self.pcode_emit.reset();
+        self.asm_emit.reset();
     }
 }
 
@@ -117,14 +139,17 @@ where
             self.mode = Some(Mode::MODE16);
         };
 
-        Ok(Sleigh {
+        let mut sleigh = Sleigh {
             sleigh_proxy: new_sleigh_proxy(&mut pinned_loader),
             asm_emit: AsmCollectorWrapper::new(Box::new(self.asm_collector.unwrap())),
             pcode_emit:  PcodeCollectorWrapper::new(Box::new(self.pcode_collector.unwrap())),
             spec: self.spec.unwrap(),
             mode: self.mode.unwrap(),
             loader: pinned_loader
-        })
+        };
+
+        sleigh.init();
+        Ok(sleigh)
     }
 }
 

@@ -3,6 +3,7 @@ use crate::internal::ffi::ffi::AddressProxy;
 use crate::internal::ffi::pcode::ffi::PcodeOpCode;
 use crate::pcode::Address;
 use std::pin::Pin;
+use std::any::Any;
 
 #[derive(Debug)]
 pub struct PcodeVarnodeData {
@@ -46,11 +47,15 @@ pub trait PcodeCollector {
         outvar: Option<&VarnodeDataProxy>,
         vars: &[&VarnodeDataProxy],
     );
+
+    fn reset(&mut self) {}
+
+    fn as_any(&self) -> &dyn Any;
 }
 
 #[derive(Debug)]
 pub struct DefaultPcodeCollector {
-    pub pcode_asms: Vec<PcodeInstruction>,
+    pcode_asms: Vec<PcodeInstruction>,
 }
 
 impl DefaultPcodeCollector {
@@ -59,9 +64,17 @@ impl DefaultPcodeCollector {
             pcode_asms: vec![]
         }
     }
+
+    pub fn get_content(&self) -> &Vec<PcodeInstruction> {
+        &self.pcode_asms
+    }
 }
 
 impl PcodeCollector for DefaultPcodeCollector {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
     fn dump(
         &mut self,
         addr: &AddressProxy,
@@ -91,6 +104,10 @@ impl PcodeCollector for DefaultPcodeCollector {
             out_var,
         });
     }
+
+    fn reset(&mut self) {
+        self.pcode_asms.clear();
+    }
 }
 
 pub struct PcodeCollectorWrapper {
@@ -100,6 +117,14 @@ pub struct PcodeCollectorWrapper {
 impl PcodeCollectorWrapper {
     pub fn new(internal: Box<dyn PcodeCollector>) -> Self {
         Self { internal }
+    }
+
+    pub fn reset(&mut self) {
+        self.internal.reset();
+    }
+
+    pub fn cast<T: PcodeCollector + 'static>(&self) -> &T {
+        self.internal.as_any().downcast_ref::<T>().unwrap()
     }
 
     pub fn dump(
