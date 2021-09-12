@@ -24,6 +24,7 @@ use cxx::UniquePtr;
 
 use crate::internal::ffi::ffi::*;
 use std::borrow::BorrowMut;
+use std::fs::read_to_string;
 use std::pin::Pin;
 use crate::config::Mode;
 
@@ -121,7 +122,7 @@ where
 
     pub fn set_spec(mut self, spec: String) -> Self {
         // self.load_image = unsafe{Some(Box::from_raw(loader))};
-        self.spec = Some(spec);
+        self.spec = Some(read_to_string(spec).unwrap());
         self
     }
 
