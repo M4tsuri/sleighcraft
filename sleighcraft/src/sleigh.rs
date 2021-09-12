@@ -1,8 +1,7 @@
 use crate::{config::Mode, internal::{collectors::{asm_collector::AsmCollector, pcode_collector::{PcodeCollector, PcodeInstruction}}, loaders::Loader, sleigh::{Sleigh, SleighBuilder}}, pcode::Instruction};
 use crate::internal::loaders::plain::PlainLoader;
 use crate::internal::collectors::{asm_collector::DefaultAsmCollector, pcode_collector::DefaultPcodeCollector};
-use crate::config::PRESET;
-use crate::internal::error::{Error, Result};
+use crate::internal::error::Result;
 
 #[allow(dead_code)]
 pub struct Rs {
@@ -11,8 +10,8 @@ pub struct Rs {
 
 #[allow(dead_code)]
 impl Rs {
-    pub fn new(arch_str: &str, mode: Mode) -> Self {
-        let spec = Self::arch(arch_str).unwrap();
+    pub fn new(spec_path: &str, mode: Mode) -> Self {
+        let spec = spec_path.into();
         let loader = PlainLoader::new();
         let asm_collector = DefaultAsmCollector::new();
         let pcode_collector = DefaultPcodeCollector::new();
@@ -59,12 +58,5 @@ impl Rs {
         let asm_collector = self.get_asm_collector::<DefaultAsmCollector>();
 
         Ok((asm_collector.get_content(), pcode_collector.get_content()))  
-    }
-
-    fn arch(name: &str) -> Result<String> {
-        let content = *PRESET
-            .get(&name.to_lowercase().as_str())
-            .ok_or(Error::ArchNotFound(name.to_string()))?;
-        Ok(content.into())
     }
 }
