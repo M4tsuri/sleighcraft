@@ -20,7 +20,7 @@
 
 pub mod plain;
 
-use crate::ffi::ffi::AddressProxy;
+use crate::internal::ffi::ffi::AddressProxy;
 
 /// Any loader must implement Loader trait, which enables sleigh to get raw bytes
 pub trait Loader {
@@ -33,11 +33,11 @@ pub trait Loader {
 
 /// Wrapper for any object which implements `Loader` trait, only for ffi usage.
 /// We use dynamic dispatch here to better comminucate with the c++ side
-pub struct RustLoaderWrapper<'a> {
-    internal: &'a mut dyn Loader
+pub struct LoaderWrapper {
+    internal: Box<dyn Loader>
 }
 
-impl<'a> RustLoaderWrapper<'a> {
+impl LoaderWrapper {
     pub(crate) fn load_fill(&mut self, ptr: &mut [u8], addr: &AddressProxy) {
         self.internal.load_fill(ptr, addr)
     }
@@ -51,9 +51,9 @@ impl<'a> RustLoaderWrapper<'a> {
     }
 }
 
-impl<'a> RustLoaderWrapper<'a> {
-    pub(crate) fn new(loader: &'a mut dyn Loader) -> Self {
-        RustLoaderWrapper {
+impl LoaderWrapper {
+    pub(crate) fn new(loader: Box<dyn Loader>) -> Self {
+        LoaderWrapper {
             internal: loader
         }
     }

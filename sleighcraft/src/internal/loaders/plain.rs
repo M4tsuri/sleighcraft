@@ -14,7 +14,7 @@
 // limitations under the License.
 // This file is changed.
 
-use crate::ffi::ffi::AddressProxy;
+use crate::internal::ffi::ffi::AddressProxy;
 use super::Loader;
 
 /// A plain loader which loads specified bytes into the internal buffer without any 

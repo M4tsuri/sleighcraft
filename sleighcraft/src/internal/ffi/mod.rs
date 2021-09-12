@@ -20,22 +20,27 @@
 
 
 pub mod pcode;
-use crate::sleigh::{RustAssemblyEmit, RustPcodeEmit, Instruction};
-use crate::loaders::{RustLoaderWrapper};
+use crate::internal::loaders::LoaderWrapper;
+use crate::internal::collectors::asm_collector::AsmCollectorWrapper;
+use crate::internal::collectors::pcode_collector::PcodeCollectorWrapper;
+use crate::pcode::Instruction;
 
-type RustLoadImage<'a> = RustLoaderWrapper<'a>;
+type RustLoadImage = LoaderWrapper;
+type RustAssemblyEmit = AsmCollectorWrapper;
+type RustPcodeEmit = PcodeCollectorWrapper;
+
 #[allow(dead_code)]
 #[cxx::bridge]
 pub(crate) mod ffi {
     extern "Rust" {
-        type RustAssemblyEmit<'a>;
+        type RustAssemblyEmit;
         fn dump(
             self: &mut RustAssemblyEmit,
             address: &AddressProxy,
             mnem: &CxxString,
             body: &CxxString,
         );
-        type RustPcodeEmit<'a>;
+        type RustPcodeEmit;
         fn dump(
             self: &mut RustPcodeEmit,
             address: &AddressProxy,
@@ -43,7 +48,7 @@ pub(crate) mod ffi {
             outvar: Pin<&mut VarnodeDataProxy>,
             vars: &CxxVector<VarnodeDataProxy>,
         );
-        type RustLoadImage<'a>;
+        type RustLoadImage;
         fn load_fill(self: &mut RustLoadImage, ptr: &mut [u8], addr: &AddressProxy);
         //fn get_arch_type(self: &RustLoadImage) -> String;
         fn adjust_vma(self: &mut RustLoadImage, adjust: isize);
@@ -57,8 +62,8 @@ pub(crate) mod ffi {
     }
 
     unsafe extern "C++" {
-        type PcodeOpCode = crate::ffi::pcode::ffi::PcodeOpCode;
-        type SpaceType = crate::ffi::pcode::ffi::SpaceType;
+        type PcodeOpCode = crate::internal::ffi::pcode::ffi::PcodeOpCode;
+        type SpaceType = crate::internal::ffi::pcode::ffi::SpaceType;
 
         include!("bridge/disasm.h");
         include!("bridge/proxies.h");

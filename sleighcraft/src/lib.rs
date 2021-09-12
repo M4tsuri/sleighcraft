@@ -12,9 +12,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#![feature(concat_idents)]
 
-pub mod error;
-pub mod sleigh;
 pub mod pcode;
-pub mod loaders;
-mod ffi;
+pub mod sleigh;
+
+mod internal;
+mod config;

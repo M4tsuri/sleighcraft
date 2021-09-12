@@ -14,8 +14,36 @@
 // limitations under the License.
 // This file is changed.
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Address {
+    pub space: String,
+    pub offset: u64,
+}
+
+#[derive(Debug)]
+pub struct Instruction {
+    pub addr: Address,
+    pub mnemonic: String,
+    pub body: String,
+}
+
+impl Instruction {
+    pub fn set_addr(&mut self, sp: String, of: u64) {
+        self.addr = Address {
+            space: sp,
+            offset: of,
+        }
+    }
+    pub fn set_mnemonic(&mut self, mnem: String) {
+        self.mnemonic = mnem
+    }
+    pub fn set_body(&mut self, body: String) {
+        self.body = body
+    }
+}
+
 /// a pcode op, same with which in ghidra
-pub type PcodeOp = crate::ffi::pcode::ffi::PcodeOpCode;
+pub type PcodeOp = crate::internal::ffi::pcode::ffi::PcodeOpCode;
 
 impl AsRef<str> for PcodeOp {
     fn as_ref(&self) -> &str {
